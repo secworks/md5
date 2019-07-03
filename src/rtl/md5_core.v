@@ -53,10 +53,10 @@ module md5_core(
   //----------------------------------------------------------------
   // Internal constant and parameter definitions.
   //----------------------------------------------------------------
-  localparam H0 = 32'h67452301;
-  localparam H1 = 32'hefcdab89;
-  localparam H2 = 32'h98badcfe;
-  localparam H3 = 32'h10325476;
+  localparam A0 = 32'h67452301;
+  localparam B1 = 32'hefcdab89;
+  localparam C2 = 32'h98badcfe;
+  localparam D3 = 32'h10325476;
 
   localparam CTRL_IDLE  = 2'h0;
   localparam CTRL_INIT  = 2'h1;
@@ -70,6 +70,12 @@ module md5_core(
   reg         ready_new;
   reg         ready_we;
 
+  reg [5 : 0] round_ctr_reg;
+  reg [5 : 0] round_ctr_new;
+  reg         round_ctr_inc;
+  reg         round_ctr_rst;
+  reg         round_ctr_we;
+
   reg [1 : 0] md5_core_ctrl_reg;
   reg [1 : 0] md5_core_ctrl_new;
   reg         md5_core_ctrl_we;
@@ -78,12 +84,13 @@ module md5_core(
   //----------------------------------------------------------------
   // Wires.
   //----------------------------------------------------------------
+  wire [31 : 0] k;
 
 
   //----------------------------------------------------------------
   // Instantiations.
   //----------------------------------------------------------------
-
+  md5_k_rom k_rom(.x(), .y(k));
 
   //----------------------------------------------------------------
   // Concurrent connectivity for ports etc.
@@ -103,6 +110,7 @@ module md5_core(
       if (!reset_n)
         begin
           ready_reg         <= 1'h1;
+          round_ctr_reg     <= 6'h0;
           md5_core_ctrl_reg <= CTRL_IDLE;
         end
       else
@@ -110,10 +118,35 @@ module md5_core(
           if (ready_we)
             ready_reg <= ready_new;
 
+          if (round_ctr_we)
+            round_ctr_reg <= round_ctr_new;
+
           if (md5_core_ctrl_we)
             md5_core_ctrl_reg <= md5_core_ctrl_new;
         end
     end // reg_update
+
+
+  //----------------------------------------------------------------
+  // round_ctr
+  //----------------------------------------------------------------
+  always @*
+    begin : round_ctr
+      round_ctr_new = 6'h0;
+      round_ctr_we  = 1'h0;
+
+      if (round_ctr_rst)
+        begin
+          round_ctr_new <= 6'h0;
+          round_ctr_we  <= 1'h1;
+        end
+
+      if (round_ctr_inc)
+        begin
+          round_ctr_new <= round_ctr_reg + 1'h1;
+          round_ctr_we  <= 1'h1;
+        end
+    end
 
 
   //----------------------------------------------------------------
