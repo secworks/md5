@@ -11,7 +11,7 @@ hash function that shouldn't be used. But sometimes one needs the
 implementation of a broken hash function anyway...
 
 Do use this to for example break things like password hashes. Do NOT use
-it to protect anythihg - password hashes for example.
+it to protect anything - password hashes for example.
 
 
 ## Implementation

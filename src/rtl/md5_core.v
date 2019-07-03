@@ -53,6 +53,11 @@ module md5_core(
   //----------------------------------------------------------------
   // Internal constant and parameter definitions.
   //----------------------------------------------------------------
+  localparam H0 = 32'h67452301;
+  localparam H1 = 32'hefcdab89;
+  localparam H2 = 32'h98badcfe;
+  localparam H3 = 32'h10325476;
+
   localparam CTRL_IDLE  = 2'h0;
   localparam CTRL_INIT  = 2'h1;
   localparam CTRL_NEXT  = 2'h2;
