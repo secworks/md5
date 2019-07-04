@@ -54,37 +54,54 @@ module md5_core(
   // Internal constant and parameter definitions.
   //----------------------------------------------------------------
   localparam A0 = 32'h67452301;
-  localparam B1 = 32'hefcdab89;
-  localparam C2 = 32'h98badcfe;
-  localparam D3 = 32'h10325476;
+  localparam B0 = 32'hefcdab89;
+  localparam C0 = 32'h98badcfe;
+  localparam D0 = 32'h10325476;
 
-  localparam CTRL_IDLE  = 2'h0;
-  localparam CTRL_INIT  = 2'h1;
-  localparam CTRL_NEXT  = 2'h2;
+  localparam CTRL_IDLE = 2'h0;
+  localparam CTRL_INIT = 2'h1;
+  localparam CTRL_NEXT = 2'h2;
 
 
   //----------------------------------------------------------------
   // Registers including update variables and write enable.
   //----------------------------------------------------------------
-  reg         ready_reg;
-  reg         ready_new;
-  reg         ready_we;
+  reg [31 : 0] a_reg;
+  reg [31 : 0] a_new;
+  reg [31 : 0] b_reg;
+  reg [31 : 0] b_new;
+  reg [31 : 0] c_reg;
+  reg [31 : 0] c_new;
+  reg [31 : 0] d_reg;
+  reg [31 : 0] d_new;
+  reg          a_d_we;
 
-  reg [5 : 0] round_ctr_reg;
-  reg [5 : 0] round_ctr_new;
-  reg         round_ctr_inc;
-  reg         round_ctr_rst;
-  reg         round_ctr_we;
+  reg          ready_reg;
+  reg          ready_new;
+  reg          ready_we;
 
-  reg [1 : 0] md5_core_ctrl_reg;
-  reg [1 : 0] md5_core_ctrl_new;
-  reg         md5_core_ctrl_we;
+  reg [5 : 0]  round_ctr_reg;
+  reg [5 : 0]  round_ctr_new;
+  reg          round_ctr_inc;
+  reg          round_ctr_rst;
+  reg          round_ctr_we;
+
+  reg [1 : 0]  md5_core_ctrl_reg;
+  reg [1 : 0]  md5_core_ctrl_new;
+  reg          md5_core_ctrl_we;
 
 
   //----------------------------------------------------------------
   // Wires.
   //----------------------------------------------------------------
   wire [31 : 0] k;
+  reg           dp_init;
+  reg           dp_update;
+
+
+  //----------------------------------------------------------------
+  // Function declarations.
+  //----------------------------------------------------------------
 
 
   //----------------------------------------------------------------
@@ -92,10 +109,11 @@ module md5_core(
   //----------------------------------------------------------------
   md5_k_rom k_rom(.x(), .y(k));
 
+
   //----------------------------------------------------------------
   // Concurrent connectivity for ports etc.
   //----------------------------------------------------------------
-  assign ready        = ready_reg;
+  assign ready = ready_reg;
 
 
   //----------------------------------------------------------------
@@ -109,6 +127,10 @@ module md5_core(
     begin: reg_update
       if (!reset_n)
         begin
+          a_reg             <= 32'h0;
+          b_reg             <= 32'h0;
+          c_reg             <= 32'h0;
+          d_reg             <= 32'h0;
           ready_reg         <= 1'h1;
           round_ctr_reg     <= 6'h0;
           md5_core_ctrl_reg <= CTRL_IDLE;
@@ -118,6 +140,13 @@ module md5_core(
           if (ready_we)
             ready_reg <= ready_new;
 
+          if (a_d_we)
+            begin
+              a_reg <= a_new;
+              b_reg <= b_new;
+              c_reg <= c_new;
+            end
+
           if (round_ctr_we)
             round_ctr_reg <= round_ctr_new;
 
@@ -125,6 +154,43 @@ module md5_core(
             md5_core_ctrl_reg <= md5_core_ctrl_new;
         end
     end // reg_update
+
+
+  //----------------------------------------------------------------
+  // md5_datapath
+  //----------------------------------------------------------------
+  always @*
+    begin : md5_datapath
+      reg [31 : 0] F;
+      reg [31 : 0] G;
+      reg [31 : 0] H;
+      reg [31 : 0] I;
+
+      a_new  = 32'h0;
+      b_new  = 32'h0;
+      c_new  = 32'h0;
+      d_new  = 32'h0;
+      a_d_we = 1'h0;
+
+
+      F = (b_reg & c_reg) | (~b_reg & d_reg);
+      G = (b_reg & d_reg) | (c_reg & ~d_reg);
+      H = b_reg ^ c_reg ^ d_reg;
+      I = c_reg ^ (b_reg | ~d_reg);
+
+
+      if (dp_init)
+        begin
+          a_reg = A0;
+          b_reg = B0;
+          c_reg = C0;
+          d_reg = D0;
+        end
+
+      if (dp_update)
+        begin
+        end
+    end
 
 
   //----------------------------------------------------------------
@@ -137,14 +203,14 @@ module md5_core(
 
       if (round_ctr_rst)
         begin
-          round_ctr_new <= 6'h0;
-          round_ctr_we  <= 1'h1;
+          round_ctr_new = 6'h0;
+          round_ctr_we  = 1'h1;
         end
 
       if (round_ctr_inc)
         begin
-          round_ctr_new <= round_ctr_reg + 1'h1;
-          round_ctr_we  <= 1'h1;
+          round_ctr_new = round_ctr_reg + 1'h1;
+          round_ctr_we  = 1'h1;
         end
     end
 
@@ -156,8 +222,12 @@ module md5_core(
     begin : md5_core_ctrl
       ready_new         = 1'h0;
       ready_we          = 1'h0;
+      round_ctr_inc     = 1'h0;
+      round_ctr_rst     = 1'h0;
+      dp_init           = 1'h0;
+      dp_update         = 1'h0;
       md5_core_ctrl_new = CTRL_IDLE;
-      md5_core_ctrl_we  = 1'b0;
+      md5_core_ctrl_we  = 1'h0;
 
       case (md5_core_ctrl_reg)
         CTRL_IDLE:
