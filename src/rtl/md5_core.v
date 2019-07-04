@@ -58,9 +58,10 @@ module md5_core(
   localparam C0 = 32'h98badcfe;
   localparam D0 = 32'h10325476;
 
-  localparam CTRL_IDLE = 2'h0;
-  localparam CTRL_INIT = 2'h1;
-  localparam CTRL_NEXT = 2'h2;
+  localparam CTRL_IDLE   = 2'h0;
+  localparam CTRL_NEXT   = 2'h1;
+  localparam CTRL_LOOP   = 2'h2;
+  localparam CTRL_FINISH = 2'h3;
 
 
   //----------------------------------------------------------------
@@ -232,6 +233,24 @@ module md5_core(
       case (md5_core_ctrl_reg)
         CTRL_IDLE:
           begin
+            if (init)
+              begin
+                dp_init       = 1'h0;
+                round_ctr_rst = 1'h1;
+              end
+          end
+
+        if (next)
+          begin
+            round_ctr_rst     = 1'h1;
+            md5_core_ctrl_new = CTRL_NEXT;
+            md5_core_ctrl_we  = 1'h1;
+          end
+
+        CTRL_NEXT:
+          begin
+            md5_core_ctrl_new = CTRL_IDLE;
+            md5_core_ctrl_we  = 1'h1;
           end
 
         default:
