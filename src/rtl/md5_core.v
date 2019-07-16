@@ -96,7 +96,6 @@ module md5_core(
   //----------------------------------------------------------------
   // Wires.
   //----------------------------------------------------------------
-  wire [31 : 0] k;
   reg           dp_init;
   reg           dp_update;
 
@@ -104,7 +103,7 @@ module md5_core(
   //----------------------------------------------------------------
   // Function declarations.
   //----------------------------------------------------------------
-  // F non linear function.
+  // F non-linear function.
   function [31 : 0] F(input [31 : 0] b, input [31 : 0] c,
                       input [31 : 0] d, input [5 : 0] round);
     begin
@@ -123,7 +122,79 @@ module md5_core(
   endfunction // F
 
 
-  // shamt
+  // K constants
+  function [31 : 0] K(input [5 : 0] round);
+    begin
+      case(round)
+        6'h00: K = 32'hd76aa478;
+        6'h01: K = 32'he8c7b756;
+        6'h02: K = 32'h242070db;
+        6'h03: K = 32'hc1bdceee;
+        6'h04: K = 32'hf57c0faf;
+        6'h05: K = 32'h4787c62a;
+        6'h06: K = 32'ha8304613;
+        6'h07: K = 32'hfd469501;
+        6'h08: K = 32'h698098d8;
+        6'h09: K = 32'h8b44f7af;
+        6'h0a: K = 32'hffff5bb1;
+        6'h0b: K = 32'h895cd7be;
+        6'h0c: K = 32'h6b901122;
+        6'h0d: K = 32'hfd987193;
+        6'h0e: K = 32'ha679438e;
+        6'h0f: K = 32'h49b40821;
+        6'h10: K = 32'hf61e2562;
+        6'h11: K = 32'hc040b340;
+        6'h12: K = 32'h265e5a51;
+        6'h13: K = 32'he9b6c7aa;
+        6'h14: K = 32'hd62f105d;
+        6'h15: K = 32'h02441453;
+        6'h16: K = 32'hd8a1e681;
+        6'h17: K = 32'he7d3fbc8;
+        6'h18: K = 32'h21e1cde6;
+        6'h19: K = 32'hc33707d6;
+        6'h1a: K = 32'hf4d50d87;
+        6'h1b: K = 32'h455a14ed;
+        6'h1c: K = 32'ha9e3e905;
+        6'h1d: K = 32'hfcefa3f8;
+        6'h1e: K = 32'h676f02d9;
+        6'h1f: K = 32'h8d2a4c8a;
+        6'h20: K = 32'hfffa3942;
+        6'h21: K = 32'h8771f681;
+        6'h22: K = 32'h6d9d6122;
+        6'h23: K = 32'hfde5380c;
+        6'h24: K = 32'ha4beea44;
+        6'h25: K = 32'h4bdecfa9;
+        6'h26: K = 32'hf6bb4b60;
+        6'h27: K = 32'hbebfbc70;
+        6'h28: K = 32'h289b7ec6;
+        6'h29: K = 32'heaa127fa;
+        6'h2a: K = 32'hd4ef3085;
+        6'h2b: K = 32'h04881d05;
+        6'h2c: K = 32'hd9d4d039;
+        6'h2d: K = 32'he6db99e5;
+        6'h2e: K = 32'h1fa27cf8;
+        6'h2f: K = 32'hc4ac5665;
+        6'h30: K = 32'hf4292244;
+        6'h31: K = 32'h432aff97;
+        6'h32: K = 32'hab9423a7;
+        6'h33: K = 32'hfc93a039;
+        6'h34: K = 32'h655b59c3;
+        6'h35: K = 32'h8f0ccc92;
+        6'h36: K = 32'hffeff47d;
+        6'h37: K = 32'h85845dd1;
+        6'h38: K = 32'h6fa87e4f;
+        6'h39: K = 32'hfe2ce6e0;
+        6'h3a: K = 32'ha3014314;
+        6'h3b: K = 32'h4e0811a1;
+        6'h3c: K = 32'hf7537e82;
+        6'h3d: K = 32'hbd3af235;
+        6'h3e: K = 32'h2ad7d2bb;
+        6'h3f: K = 32'heb86d391;
+      endcase // case (round)
+    end
+  endfunction // K
+
+
   // Round based shift amount.
   function [31 : 0] shamt(input [31 : 0] x, input [5 : 0] round);
     begin
@@ -162,10 +233,28 @@ module md5_core(
   endfunction // shamt
 
 
-  //----------------------------------------------------------------
-  // Instantiations.
-  //----------------------------------------------------------------
-  md5_k_rom k_rom(.x(round_ctr_reg[5 : 0]), .y(k));
+  // word index / schedule for the message block.
+  function [31 : 0] mi(input [511 : 0] m, input [5 : 0] round);
+    begin : mi_function
+      reg [8 : 0] s;
+      reg [3 : 0] i;
+
+      if (round < 16)
+        s = {3'h0, round};
+
+      if ((round >= 16) &&  (round < 32))
+        s = (5 * round + 1);
+
+      if ((round >= 32) && (round < 48))
+        s = (3 * round + 5);
+
+      if (round >= 48)
+        s = 7 * round;
+
+      i = s[3 : 0];
+      mi = m[16 - i * 32 +: 32];
+    end
+  endfunction // mi
 
 
   //----------------------------------------------------------------
@@ -221,9 +310,12 @@ module md5_core(
   //----------------------------------------------------------------
   always @*
     begin : md5_datapath
-      reg [31 : 0] new_F;
-      reg [31 : 0] tmp_b;
+      reg [31 : 0] f;
+      reg [31 : 0] k;
       reg [31 : 0] m;
+      reg [31 : 0] tmp_b0;
+      reg [31 : 0] tmp_b1;
+      reg [31 : 0] tmp_b2;
 
       a_new  = 32'h0;
       b_new  = 32'h0;
@@ -231,9 +323,14 @@ module md5_core(
       d_new  = 32'h0;
       a_d_we = 1'h0;
 
-      m = block[31 : 0];
-      new_F = F(b_reg, c_reg, d_reg, round_ctr_reg[5 : 0]);
-      tmp_b = shamt((a_reg + new_F + m + k), round_ctr_reg[5 : 0]);
+      m = mi(block, round_ctr_reg[5 : 0]);
+      f = F(b_reg, c_reg, d_reg, round_ctr_reg[5 : 0]);
+      k = K(round_ctr_reg[5 : 0]);
+
+      tmp_b0 = a_reg + f + m + k;
+      tmp_b1 = shamt(tmp_b0, round_ctr_reg[5 : 0]);
+      tmp_b2 = tmp_b1 + b_reg;
+
 
       if (dp_init)
         begin
@@ -247,7 +344,7 @@ module md5_core(
       if (dp_update)
         begin
           a_new  = d_reg;
-          b_new  = tmp_b;
+          b_new  = tmp_b2;
           c_new  = b_reg;
           d_new  = c_reg;
           a_d_we = 1'h1;

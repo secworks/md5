@@ -36,7 +36,7 @@
 #
 #===================================================================
 
-CORE_SRC=../src/rtl/md5_core.v ../src/rtl/md5_k_rom.v
+CORE_SRC=../src/rtl/md5_core.v
 #TOP_SRC=../src/rtl/md5.v $(CORE_SRC)
 
 TB_CORE_SRC =../src/tb/tb_md5_core.v
