@@ -233,25 +233,78 @@ module md5_core(
   endfunction // shamt
 
 
-  // word index / schedule for the message block.
+  // Schedule and selction of words in the message block.
   function [31 : 0] mi(input [511 : 0] m, input [5 : 0] round);
     begin : mi_function
-      reg [8 : 0] s;
       reg [3 : 0] i;
 
-      if (round < 16)
-        s = {3'h0, round};
+      case(round)
+        6'h00: i = 0;
+        6'h01: i = 1;
+        6'h02: i = 2;
+        6'h03: i = 3;
+        6'h04: i = 4;
+        6'h05: i = 5;
+        6'h06: i = 6;
+        6'h07: i = 7;
+        6'h08: i = 8;
+        6'h09: i = 9;
+        6'h0a: i = 10;
+        6'h0b: i = 11;
+        6'h0c: i = 12;
+        6'h0d: i = 13;
+        6'h0e: i = 14;
+        6'h0f: i = 15;
+        6'h10: i = 1;
+        6'h11: i = 6;
+        6'h12: i = 11;
+        6'h13: i = 0;
+        6'h14: i = 5;
+        6'h15: i = 10;
+        6'h16: i = 15;
+        6'h17: i = 4;
+        6'h18: i = 9;
+        6'h19: i = 14;
+        6'h1a: i = 3;
+        6'h1b: i = 8;
+        6'h1c: i = 13;
+        6'h1d: i = 2;
+        6'h1e: i = 7;
+        6'h1f: i = 12;
+        6'h20: i = 5;
+        6'h21: i = 8;
+        6'h22: i = 11;
+        6'h23: i = 14;
+        6'h24: i = 1;
+        6'h25: i = 4;
+        6'h26: i = 7;
+        6'h27: i = 10;
+        6'h28: i = 13;
+        6'h29: i = 0;
+        6'h2a: i = 3;
+        6'h2b: i = 6;
+        6'h2c: i = 9;
+        6'h2d: i = 12;
+        6'h2e: i = 15;
+        6'h2f: i = 2;
+        6'h30: i = 0;
+        6'h31: i = 7;
+        6'h32: i = 14;
+        6'h33: i = 5;
+        6'h34: i = 12;
+        6'h35: i = 3;
+        6'h36: i = 10;
+        6'h37: i = 1;
+        6'h38: i = 8;
+        6'h39: i = 15;
+        6'h3a: i = 6;
+        6'h3b: i = 13;
+        6'h3c: i = 4;
+        6'h3d: i = 11;
+        6'h3e: i = 2;
+        6'h3f: i = 9;
+      endcase // case (round)
 
-      if ((round >= 16) &&  (round < 32))
-        s = (5 * round + 1);
-
-      if ((round >= 32) && (round < 48))
-        s = (3 * round + 5);
-
-      if (round >= 48)
-        s = 7 * round;
-
-      i = s[3 : 0];
       mi = m[16 - i * 32 +: 32];
     end
   endfunction // mi
