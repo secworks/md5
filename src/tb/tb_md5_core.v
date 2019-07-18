@@ -132,8 +132,8 @@ module tb_md5_core();
       $display("Internal states:");
       $display("md5_core_ctrl_reg = 0x%02x, md5_core_ctrl_new = 0x%02x, round_ctr_reg = 0x%03x",
                dut.md5_core_ctrl_reg, dut.md5_core_ctrl_new, dut.round_ctr_reg);
-      $display("a_reg = 0x%08x, b_reg = 0x%08x, c_reg = 0x%08x, d_reg = 0x%08x",
-               dut.a_reg, dut.b_reg, dut.c_reg, dut.d_reg);
+      $display("a_reg = 0x%08x, b_reg = 0x%08x, c_reg = 0x%08x, d_reg = 0x%08x, a_d_we = 0x%01x",
+               dut.a_reg, dut.b_reg, dut.c_reg, dut.d_reg, dut.a_d_we);
       $display("");
     end
   endtask // dump_dut_state
