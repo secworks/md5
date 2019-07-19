@@ -247,7 +247,7 @@ module tb_md5_core();
       #(2 * CLK_PERIOD);
       tb_next = 1'h0;
       wait_ready();
-      tb_monitor = 0;
+      #(2 * CLK_PERIOD);
 
       if (tb_digest == 512'h0)
         $display("Correct result for TC1.");
@@ -258,6 +258,8 @@ module tb_md5_core();
         end
       $display("*** TC1 completed.");
       $display("");
+
+      tb_monitor = 0;
     end
   endtask // tc1
 

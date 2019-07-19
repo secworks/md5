@@ -305,7 +305,7 @@ module md5_core(
         6'h3f: i = 9;
       endcase // case (round)
 
-      mi = m[16 - i * 32 +: 32];
+      mi = m[(6'hf - {2'h0, i}) * 32 +: 32];
     end
   endfunction // mi
 
