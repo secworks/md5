@@ -359,10 +359,10 @@ module md5_core(
 
 
   //----------------------------------------------------------------
-  // md5_datapath
+  // md5_dp
   //----------------------------------------------------------------
   always @*
-    begin : md5_datapath
+    begin : md5_dp
       reg [31 : 0] f;
       reg [31 : 0] k;
       reg [31 : 0] m;
@@ -447,7 +447,7 @@ module md5_core(
           begin
             if (init)
               begin
-                dp_init       = 1'h0;
+                dp_init = 1'h1;
               end
 
             if (next)
