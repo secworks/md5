@@ -72,9 +72,9 @@ module md5(
   localparam ADDR_DIGEST0     = 8'h30;
   localparam ADDR_DIGEST3     = 8'h33;
 
-  localparam CORE_NAME0       = 32'h78743561; // "md5"
-  localparam CORE_NAME1       = 32'h2d313238; // "-128"
-  localparam CORE_VERSION     = 32'h302e3530; // "0.50"
+  localparam CORE_NAME0       = 32'h6d643520; // "md5 "
+  localparam CORE_NAME1       = 32'h68617368; // "hash"
+  localparam CORE_VERSION     = 32'h302e3130; // "0.10"
 
 
   //----------------------------------------------------------------
