@@ -235,14 +235,14 @@ module tb_md5_core();
       tc_ctr = tc_ctr + 1;
       tb_monitor = 1;
 
-      $display("Asserting init.");
+      $display("-- Asserting init.");
       tb_init = 1'h1;
       #(2 * CLK_PERIOD);
       tb_init = 1'h0;
 
       #(2 * CLK_PERIOD);
 
-      $display("Asserting next.");
+      $display("-- Asserting next.");
       tb_block = {32'h00000080, 32'h0, 32'h0, 32'h0,
                   32'h0,        32'h0, 32'h0, 32'h0,
                   32'h0,        32'h0, 32'h0, 32'h0,
@@ -254,10 +254,10 @@ module tb_md5_core();
       #(2 * CLK_PERIOD);
 
       if (tb_digest == 128'hd41d8cd98f00b204e9800998ecf8427e)
-        $display("Correct result for TC1.");
+        $display("** Correct result for TC1.");
       else
         begin
-          $display("Incorrect result for TC1. Expected 0xd41d8cd98f00b204e9800998ecf8427e, Got 0x%032x", tb_digest);
+          $display("** Incorrect result for TC1. Expected 0xd41d8cd98f00b204e9800998ecf8427e, Got 0x%032x", tb_digest);
           error_ctr = error_ctr + 1;
         end
       $display("*** TC1 completed.");
