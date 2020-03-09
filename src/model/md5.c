@@ -109,11 +109,11 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
         printf("Block input\n");
         printf("w00: 0x%08x  w01: 0x%08x  w02: 0x%08x  w03: 0x%08x\n",
                w[0], w[1], w[2], w[3]);
-        printf("w00: 0x%08x  w01: 0x%08x  w02: 0x%08x  w03: 0x%08x\n",
+        printf("w04: 0x%08x  w05: 0x%08x  w06: 0x%08x  w07: 0x%08x\n",
                w[4], w[5], w[6], w[7]);
-        printf("w00: 0x%08x  w01: 0x%08x  w02: 0x%08x  w03: 0x%08x\n",
+        printf("w08: 0x%08x  w09: 0x%08x  w10: 0x%08x  w11: 0x%08x\n",
                w[8], w[9], w[10], w[11]);
-        printf("w00: 0x%08x  w01: 0x%08x  w02: 0x%08x  w03: 0x%08x\n",
+        printf("w12: 0x%08x  w13: 0x%08x  w14: 0x%08x  w15: 0x%08x\n",
                w[12], w[13], w[14], w[15]);
 
         // Initialize hash value for this chunk:
