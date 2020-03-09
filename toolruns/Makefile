@@ -36,6 +36,8 @@
 #
 #===================================================================
 
+MODEL_SRC = ../src/model/md5.c
+
 CORE_SRC=../src/rtl/md5_core.v
 TOP_SRC=../src/rtl/md5.v $(CORE_SRC)
 
@@ -49,7 +51,7 @@ LINT = verilator
 LINT_FLAGS = +1364-2001ext+ --lint-only  -Wall -Wno-fatal -Wno-DECLFILENAME
 
 
-all: top.sim core.sim
+all: top.sim core.sim md5_model
 
 
 top.sim: $(TB_TOP_SRC) $(TOP_SRC)
@@ -58,6 +60,10 @@ top.sim: $(TB_TOP_SRC) $(TOP_SRC)
 
 core.sim: $(TB_CORE_SRC) $(CORE_SRC)
 	$(CC) $(CC_FLAGS) -o core.sim $(TB_CORE_SRC) $(CORE_SRC)
+
+
+md5_model: $(MODEL_SRC)
+	clang -Wall -o md5_model $(MODEL_SRC)
 
 
 sim-top: top.sim
@@ -75,7 +81,7 @@ lint:  $(TOP_SRC)
 clean:
 	rm -f top.sim
 	rm -f core.sim
-
+	rm -f md5_model
 
 help:
 	@echo "Build system for simulation of AES Verilog core"
