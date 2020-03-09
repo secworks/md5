@@ -62,7 +62,7 @@ module md5_core(
   localparam CTRL_LOOP   = 2'h2;
   localparam CTRL_FINISH = 2'h3;
 
-  localparam NUM_ROUNDS = (64 - 1);
+  localparam NUM_ROUNDS = 64;
 
 
   //----------------------------------------------------------------
@@ -96,8 +96,8 @@ module md5_core(
   //----------------------------------------------------------------
   // Wires.
   //----------------------------------------------------------------
-  reg           dp_init;
-  reg           dp_update;
+  reg           init_state;
+  reg           update_state;
 
 
   //----------------------------------------------------------------
@@ -321,10 +321,10 @@ module md5_core(
   // reg_update
   //
   // Update functionality for all registers in the core.
-  // All registers are positive edge triggered with synchronous
+  // All registers are positive edge triggered with asynchronous
   // active low reset.
   //----------------------------------------------------------------
-  always @ (posedge clk)
+  always @ (posedge clk or negedge reset_n)
     begin: reg_update
       if (!reset_n)
         begin
@@ -385,7 +385,7 @@ module md5_core(
       tmp_b2 = tmp_b1 + b_reg;
 
 
-      if (dp_init)
+      if (init_state)
         begin
           a_new  = A0;
           b_new  = B0;
@@ -394,7 +394,7 @@ module md5_core(
           a_d_we = 1'h1;
         end
 
-      if (dp_update)
+      if (update_state)
         begin
           a_new  = d_reg;
           b_new  = tmp_b2;
@@ -436,8 +436,8 @@ module md5_core(
       ready_we          = 1'h0;
       round_ctr_inc     = 1'h0;
       round_ctr_rst     = 1'h0;
-      dp_init           = 1'h0;
-      dp_update         = 1'h0;
+      init_state        = 1'h0;
+      update_state      = 1'h0;
       md5_core_ctrl_new = CTRL_IDLE;
       md5_core_ctrl_we  = 1'h0;
 
@@ -447,7 +447,7 @@ module md5_core(
           begin
             if (init)
               begin
-                dp_init = 1'h1;
+                init_state = 1'h1;
               end
 
             if (next)
@@ -463,7 +463,7 @@ module md5_core(
 
         CTRL_NEXT:
           begin
-            if (round_ctr_reg == NUM_ROUNDS)
+            if (round_ctr_reg < NUM_ROUNDS)
               begin
                 ready_new         = 1'h1;
                 ready_we          = 1'h1;
@@ -472,7 +472,7 @@ module md5_core(
               end
             else
               begin
-                dp_update     = 1'h1;
+                update_state = 1'h1;
                 round_ctr_inc = 1'h1;
               end
           end
