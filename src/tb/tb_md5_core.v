@@ -125,17 +125,21 @@ module tb_md5_core();
       $display("Cycle: %08d", cycle_ctr);
       $display("Inputs and outputs:");
       $display("init = 0x%01x, next = 0x%01x", dut.init, dut.next);
-      $display("block = 0x%0128x", dut.block);
+      $display("block = 0x%0128x", dut.block_reg);
       $display("ready  = 0x%01x", dut.ready);
       $display("digest = 0x%032x", dut.digest);
       $display("");
       $display("Internal states:");
-      $display("md5_core_ctrl_reg = 0x%02x, md5_core_ctrl_new = 0x%02x, round_ctr_reg = 0x%03x",
-               dut.md5_core_ctrl_reg, dut.md5_core_ctrl_new, dut.round_ctr_reg);
-      $display("a_reg = 0x%08x, b_reg = 0x%08x, c_reg = 0x%08x, d_reg = 0x%08x, a_d_we = 0x%01x",
-               dut.a_reg, dut.b_reg, dut.c_reg, dut.d_reg, dut.a_d_we);
       $display("m = 0x%08x, f = 0x%08x, k = 0x%08x", dut.md5_dp.m, dut.md5_dp.f, dut.md5_dp.k);
       $display("tmp_b0 = 0x%08x, tmp_b1 = 0x%08x", dut.md5_dp.tmp_b0, dut.md5_dp.tmp_b1);
+      $display("a_reg = 0x%08x, b_reg = 0x%08x, c_reg = 0x%08x, d_reg = 0x%08x, a_d_we = 0x%01x",
+               dut.a_reg, dut.b_reg, dut.c_reg, dut.d_reg, dut.a_d_we);
+      $display("h0_reg = 0x%08x, h1_reg = 0x%08x, h2_reg = 0x%08x, h3_reg = 0x%08x, h_we = 0x%01x",
+               dut.h0_reg, dut.h1_reg, dut.h2_reg, dut.h3_reg, dut.h_we);
+      $display("md5_core_ctrl_reg = 0x%02x, md5_core_ctrl_new = 0x%02x, round_ctr_reg = 0x%03x",
+               dut.md5_core_ctrl_reg, dut.md5_core_ctrl_new, dut.round_ctr_reg);
+      $display("init_state = 0x%01x, update_state = 0x%01x, init_round = 0x%01x, update_round = 0x%01x",
+               dut.init_state, dut.update_state, dut.init_round, dut.update_round);
       $display("");
     end
   endtask // dump_dut_state
@@ -223,11 +227,11 @@ module tb_md5_core();
 
   //----------------------------------------------------------------
   // tc1()
-  // Single, ramp block input.
+  // Single, block input representing the empty string "".
   //----------------------------------------------------------------
   task tc1;
     begin
-      $display("*** TC1 - Single ramp block hash started.");
+      $display("*** TC1 - Single empty string input started.");
       tc_ctr = tc_ctr + 1;
       tb_monitor = 1;
 
@@ -239,21 +243,21 @@ module tb_md5_core();
       #(2 * CLK_PERIOD);
 
       $display("Asserting next.");
-      tb_block = {32'h00010203, 32'h04050607, 32'h08090a0b, 32'h0c0d0e0f,
-                  32'h10111213, 32'h14151617, 32'h18191a1b, 32'h1c1d1e1f,
-                  32'h20212223, 32'h24252627, 32'h28292a2b, 32'h2c2d2e2f,
-                  32'h30313233, 32'h34353637, 32'h38393a3b, 32'h3c3d3e3f};
+      tb_block = {32'h00000080, 32'h0, 32'h0, 32'h0,
+                  32'h0,        32'h0, 32'h0, 32'h0,
+                  32'h0,        32'h0, 32'h0, 32'h0,
+                  32'h0,        32'h0, 32'h0, 32'h0};
       tb_next = 1'h1;
       #(2 * CLK_PERIOD);
       tb_next = 1'h0;
       wait_ready();
       #(2 * CLK_PERIOD);
 
-      if (tb_digest == 512'h0)
+      if (tb_digest == 128'hd41d8cd98f00b204e9800998ecf8427e)
         $display("Correct result for TC1.");
       else
         begin
-          $display("Incorrect result for TC1. Expected 0x497df3d072612cb5, Got 0x%032x", tb_digest);
+          $display("Incorrect result for TC1. Expected 0xd41d8cd98f00b204e9800998ecf8427e, Got 0x%032x", tb_digest);
           error_ctr = error_ctr + 1;
         end
       $display("*** TC1 completed.");
