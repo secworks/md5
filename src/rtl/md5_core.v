@@ -92,7 +92,7 @@ module md5_core(
   reg           ready_new;
   reg           ready_we;
 
-  reg [511 : 0] block_reg;
+  reg [31 : 0]  block_reg [0 : 15];
   reg           block_we;
 
   reg [6 : 0]   round_ctr_reg;
@@ -211,118 +211,112 @@ module md5_core(
 
 
   // Round based shift amount.
-  function [31 : 0] shamt(input [31 : 0] x, input [5 : 0] round);
+  function [31 : 0] rotate(input [31 : 0] x, input [5 : 0] round);
     begin
       if (round < 16)
         case(round[1 : 0])
-          0: shamt = {x[24 : 0], x[31 : 25]};
-          1: shamt = {x[19 : 0], x[31 : 20]};
-          2: shamt = {x[14 : 0], x[31 : 15]};
-          3: shamt = {x[09 : 0], x[31 : 10]};
+          0: rotate = {x[24 : 0], x[31 : 25]};
+          1: rotate = {x[19 : 0], x[31 : 20]};
+          2: rotate = {x[14 : 0], x[31 : 15]};
+          3: rotate = {x[09 : 0], x[31 : 10]};
         endcase // case (x[1 : 0])
 
       if ((round >= 16) && (round < 32))
         case(round[1 : 0])
-          0: shamt = {x[26 : 0], x[31 : 27]};
-          1: shamt = {x[22 : 0], x[31 : 23]};
-          2: shamt = {x[17 : 0], x[31 : 18]};
-          3: shamt = {x[11 : 0], x[31 : 12]};
+          0: rotate = {x[26 : 0], x[31 : 27]};
+          1: rotate = {x[22 : 0], x[31 : 23]};
+          2: rotate = {x[17 : 0], x[31 : 18]};
+          3: rotate = {x[11 : 0], x[31 : 12]};
         endcase // case (x[1 : 0])
 
       if ((round >= 32) && (round < 48))
         case(round[1 : 0])
-          0: shamt = {x[27 : 0], x[31 : 28]};
-          1: shamt = {x[20 : 0], x[31 : 21]};
-          2: shamt = {x[16 : 0], x[31 : 17]};
-          3: shamt = {x[08 : 0], x[31 : 09]};
+          0: rotate = {x[27 : 0], x[31 : 28]};
+          1: rotate = {x[20 : 0], x[31 : 21]};
+          2: rotate = {x[16 : 0], x[31 : 17]};
+          3: rotate = {x[08 : 0], x[31 : 09]};
         endcase // case (x[1 : 0])
 
       if (round >= 48)
         case(round[1 : 0])
-          0: shamt = {x[25 : 0], x[31 : 26]};
-          1: shamt = {x[21 : 0], x[31 : 22]};
-          2: shamt = {x[16 : 0], x[31 : 17]};
-          3: shamt = {x[10 : 0], x[31 : 11]};
+          0: rotate = {x[25 : 0], x[31 : 26]};
+          1: rotate = {x[21 : 0], x[31 : 22]};
+          2: rotate = {x[16 : 0], x[31 : 17]};
+          3: rotate = {x[10 : 0], x[31 : 11]};
         endcase // case (x[1 : 0])
     end
-  endfunction // shamt
+  endfunction // rotate
 
 
-  // Schedule and selction of words in the message block.
-  function [31 : 0] mi(input [511 : 0] m, input [5 : 0] round);
-    begin : mi_function
-      reg [3 : 0] i;
-
+  // Schedule of words in the message block.
+  function [3 : 0] G(input [5 : 0] round);
       case(round)
-        6'h00: i = 0;
-        6'h01: i = 1;
-        6'h02: i = 2;
-        6'h03: i = 3;
-        6'h04: i = 4;
-        6'h05: i = 5;
-        6'h06: i = 6;
-        6'h07: i = 7;
-        6'h08: i = 8;
-        6'h09: i = 9;
-        6'h0a: i = 10;
-        6'h0b: i = 11;
-        6'h0c: i = 12;
-        6'h0d: i = 13;
-        6'h0e: i = 14;
-        6'h0f: i = 15;
-        6'h10: i = 1;
-        6'h11: i = 6;
-        6'h12: i = 11;
-        6'h13: i = 0;
-        6'h14: i = 5;
-        6'h15: i = 10;
-        6'h16: i = 15;
-        6'h17: i = 4;
-        6'h18: i = 9;
-        6'h19: i = 14;
-        6'h1a: i = 3;
-        6'h1b: i = 8;
-        6'h1c: i = 13;
-        6'h1d: i = 2;
-        6'h1e: i = 7;
-        6'h1f: i = 12;
-        6'h20: i = 5;
-        6'h21: i = 8;
-        6'h22: i = 11;
-        6'h23: i = 14;
-        6'h24: i = 1;
-        6'h25: i = 4;
-        6'h26: i = 7;
-        6'h27: i = 10;
-        6'h28: i = 13;
-        6'h29: i = 0;
-        6'h2a: i = 3;
-        6'h2b: i = 6;
-        6'h2c: i = 9;
-        6'h2d: i = 12;
-        6'h2e: i = 15;
-        6'h2f: i = 2;
-        6'h30: i = 0;
-        6'h31: i = 7;
-        6'h32: i = 14;
-        6'h33: i = 5;
-        6'h34: i = 12;
-        6'h35: i = 3;
-        6'h36: i = 10;
-        6'h37: i = 1;
-        6'h38: i = 8;
-        6'h39: i = 15;
-        6'h3a: i = 6;
-        6'h3b: i = 13;
-        6'h3c: i = 4;
-        6'h3d: i = 11;
-        6'h3e: i = 2;
-        6'h3f: i = 9;
+        6'h00: G = 0;
+        6'h01: G = 1;
+        6'h02: G = 2;
+        6'h03: G = 3;
+        6'h04: G = 4;
+        6'h05: G = 5;
+        6'h06: G = 6;
+        6'h07: G = 7;
+        6'h08: G = 8;
+        6'h09: G = 9;
+        6'h0a: G = 10;
+        6'h0b: G = 11;
+        6'h0c: G = 12;
+        6'h0d: G = 13;
+        6'h0e: G = 14;
+        6'h0f: G = 15;
+        6'h10: G = 1;
+        6'h11: G = 6;
+        6'h12: G = 11;
+        6'h13: G = 0;
+        6'h14: G = 5;
+        6'h15: G = 10;
+        6'h16: G = 15;
+        6'h17: G = 4;
+        6'h18: G = 9;
+        6'h19: G = 14;
+        6'h1a: G = 3;
+        6'h1b: G = 8;
+        6'h1c: G = 13;
+        6'h1d: G = 2;
+        6'h1e: G = 7;
+        6'h1f: G = 12;
+        6'h20: G = 5;
+        6'h21: G = 8;
+        6'h22: G = 11;
+        6'h23: G = 14;
+        6'h24: G = 1;
+        6'h25: G = 4;
+        6'h26: G = 7;
+        6'h27: G = 10;
+        6'h28: G = 13;
+        6'h29: G = 0;
+        6'h2a: G = 3;
+        6'h2b: G = 6;
+        6'h2c: G = 9;
+        6'h2d: G = 12;
+        6'h2e: G = 15;
+        6'h2f: G = 2;
+        6'h30: G = 0;
+        6'h31: G = 7;
+        6'h32: G = 14;
+        6'h33: G = 5;
+        6'h34: G = 12;
+        6'h35: G = 3;
+        6'h36: G = 10;
+        6'h37: G = 1;
+        6'h38: G = 8;
+        6'h39: G = 15;
+        6'h3a: G = 6;
+        6'h3b: G = 13;
+        6'h3c: G = 4;
+        6'h3d: G = 11;
+        6'h3e: G = 2;
+        6'h3f: G = 9;
       endcase // case (round)
-
-      mi = m[(6'hf - {2'h0, i}) * 32 +: 32];
-    end
-  endfunction // mi
+  endfunction // G
 
 
   //----------------------------------------------------------------
@@ -341,8 +335,13 @@ module md5_core(
   //----------------------------------------------------------------
   always @ (posedge clk or negedge reset_n)
     begin: reg_update
+      integer i;
+
       if (!reset_n)
         begin
+          for (i = 0 ; i < 16 ; i = i + 1)
+            block_reg[i] <= 32'h0;
+
           h0_reg            <= 32'h0;
           h1_reg            <= 32'h0;
           h2_reg            <= 32'h0;
@@ -351,7 +350,6 @@ module md5_core(
           b_reg             <= 32'h0;
           c_reg             <= 32'h0;
           d_reg             <= 32'h0;
-          block_reg         <= 512'h0;
           ready_reg         <= 1'h1;
           round_ctr_reg     <= 7'h0;
           md5_core_ctrl_reg <= CTRL_IDLE;
@@ -362,7 +360,24 @@ module md5_core(
             ready_reg <= ready_new;
 
           if (block_we)
-            block_reg <= block;
+            begin
+              block_reg[00] <= block[511 : 480];
+              block_reg[01] <= block[479 : 448];
+              block_reg[02] <= block[447 : 416];
+              block_reg[03] <= block[415 : 384];
+              block_reg[04] <= block[383 : 352];
+              block_reg[05] <= block[351 : 320];
+              block_reg[06] <= block[319 : 288];
+              block_reg[07] <= block[287 : 256];
+              block_reg[08] <= block[255 : 224];
+              block_reg[09] <= block[223 : 192];
+              block_reg[10] <= block[191 : 160];
+              block_reg[11] <= block[159 : 128];
+              block_reg[12] <= block[127 : 096];
+              block_reg[13] <= block[095 : 064];
+              block_reg[14] <= block[063 : 032];
+              block_reg[15] <= block[031 : 000];
+            end
 
           if (h_we)
             begin
@@ -396,9 +411,10 @@ module md5_core(
     begin : md5_dp
       reg [31 : 0] f;
       reg [31 : 0] k;
-      reg [31 : 0] m;
+      reg [3 : 0]  g;
+      reg [31 : 0] w;
       reg [31 : 0] tmp_b0;
-      reg [31 : 0] tmp_b1;
+      reg [31 : 0] lr;
       reg [31 : 0] tmp_b2;
 
       h0_new = 32'h0;
@@ -413,13 +429,14 @@ module md5_core(
       d_new  = 32'h0;
       a_d_we = 1'h0;
 
-      m = mi(block, round_ctr_reg[5 : 0]);
       f = F(b_reg, c_reg, d_reg, round_ctr_reg[5 : 0]);
+      g = G(round_ctr_reg[5 : 0]);
+      w = block_reg[g];
       k = K(round_ctr_reg[5 : 0]);
 
-      tmp_b0 = a_reg + f + m + k;
-      tmp_b1 = shamt(tmp_b0, round_ctr_reg[5 : 0]);
-      tmp_b2 = tmp_b1 + b_reg;
+      tmp_b0 = a_reg + f + w + k;
+      lr = rotate(tmp_b0, round_ctr_reg[5 : 0]);
+      tmp_b2 = lr + b_reg;
 
 
       if (init_state)

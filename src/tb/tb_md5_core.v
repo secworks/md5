@@ -124,22 +124,25 @@ module tb_md5_core();
       $display("------------");
       $display("Cycle: %08d", cycle_ctr);
       $display("Inputs and outputs:");
-      $display("init = 0x%01x, next = 0x%01x", dut.init, dut.next);
-      $display("block = 0x%0128x", dut.block_reg);
+      $display("init   = 0x%01x, next = 0x%01x", dut.init, dut.next);
+      $display("block  = 0x%0128x", dut.block);
       $display("ready  = 0x%01x", dut.ready);
       $display("digest = 0x%032x", dut.digest);
       $display("");
       $display("Internal states:");
-      $display("m = 0x%08x, f = 0x%08x, k = 0x%08x", dut.md5_dp.m, dut.md5_dp.f, dut.md5_dp.k);
-      $display("tmp_b0 = 0x%08x, tmp_b1 = 0x%08x", dut.md5_dp.tmp_b0, dut.md5_dp.tmp_b1);
-      $display("a_reg = 0x%08x, b_reg = 0x%08x, c_reg = 0x%08x, d_reg = 0x%08x, a_d_we = 0x%01x",
-               dut.a_reg, dut.b_reg, dut.c_reg, dut.d_reg, dut.a_d_we);
-      $display("h0_reg = 0x%08x, h1_reg = 0x%08x, h2_reg = 0x%08x, h3_reg = 0x%08x, h_we = 0x%01x",
-               dut.h0_reg, dut.h1_reg, dut.h2_reg, dut.h3_reg, dut.h_we);
-      $display("md5_core_ctrl_reg = 0x%02x, md5_core_ctrl_new = 0x%02x, round_ctr_reg = 0x%03x",
-               dut.md5_core_ctrl_reg, dut.md5_core_ctrl_new, dut.round_ctr_reg);
       $display("init_state = 0x%01x, update_state = 0x%01x, init_round = 0x%01x, update_round = 0x%01x",
                dut.init_state, dut.update_state, dut.init_round, dut.update_round);
+      $display("h0_reg: 0x%08x, h1_reg: 0x%08x, h2_reg: 0x%08x, h3: 0x%08x, h_we: 0x%01x",
+               dut.h0_reg, dut.h1_reg, dut.h2_reg, dut.h3_reg, dut.h_we);
+      $display("a_reg:  0x%08x, b_reg:  0x%08x, c_reg:  0x%08x, d_reg: 0x%08x",
+               dut.a_reg, dut.b_reg, dut.c_reg, dut.d_reg);
+      $display("f:      0x%08x, g:      0x%08x, k:      0x%08x, w:     0x%08x",
+               dut.md5_dp.f, dut.md5_dp.g, dut.md5_dp.k, dut.md5_dp.w);
+      $display("tmp_b0: 0x%08x, lr:     0x%08x, tmp_b2: 0x%08x", dut.md5_dp.tmp_b0, dut.md5_dp.lr, dut.md5_dp.tmp_b2);
+      $display("a_new:  0x%08x, b_new:  0x%08x, c_new:  0x%08x, d_new: 0x%08x",
+               dut.a_new, dut.b_new, dut.c_new, dut.d_new);
+      $display("md5_core_ctrl_reg = 0x%02x, md5_core_ctrl_new = 0x%02x, round_ctr_reg = 0x%03x",
+               dut.md5_core_ctrl_reg, dut.md5_core_ctrl_new, dut.round_ctr_reg);
       $display("");
     end
   endtask // dump_dut_state

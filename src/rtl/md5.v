@@ -37,19 +37,16 @@
 //======================================================================
 
 module md5(
-            // Clock and reset.
-            input wire           clk,
-            input wire           reset_n,
+           input wire           clk,
+           input wire           reset_n,
 
-            // Control.
-            input wire           cs,
-            input wire           we,
+           input wire           cs,
+           input wire           we,
 
-            // Data ports.
-            input wire  [7 : 0]  address,
-            input wire  [31 : 0] write_data,
-            output wire [31 : 0] read_data
-           );
+           input wire  [7 : 0]  address,
+           input wire  [31 : 0] write_data,
+           output wire [31 : 0] read_data
+          );
 
 
   //----------------------------------------------------------------
@@ -69,8 +66,8 @@ module md5(
   localparam ADDR_BLOCK0      = 8'h20;
   localparam ADDR_BLOCK15     = 8'h2f;
 
-  localparam ADDR_DIGEST0     = 8'h30;
-  localparam ADDR_DIGEST3     = 8'h33;
+  localparam ADDR_DIGEST0     = 8'h40;
+  localparam ADDR_DIGEST3     = 8'h43;
 
   localparam CORE_NAME0       = 32'h6d643520; // "md5 "
   localparam CORE_NAME1       = 32'h68617368; // "hash"
