@@ -233,7 +233,7 @@ module md5_core(
         case(round[1 : 0])
           0: rotate = {x[27 : 0], x[31 : 28]};
           1: rotate = {x[20 : 0], x[31 : 21]};
-          2: rotate = {x[16 : 0], x[31 : 17]};
+          2: rotate = {x[15 : 0], x[31 : 16]};
           3: rotate = {x[08 : 0], x[31 : 09]};
         endcase // case (x[1 : 0])
 
@@ -317,6 +317,10 @@ module md5_core(
         6'h3f: G = 9;
       endcase // case (round)
   endfunction // G
+
+  function [31 : 0] byteflip(input  [31 : 0] w);
+    byteflip = {w[7 : 0], w[15 : 8],  w[23 : 16], w[31 : 24]};
+  endfunction // byteflip
 
 
   //----------------------------------------------------------------
@@ -450,10 +454,10 @@ module md5_core(
 
       if (update_state)
         begin
-          h0_new  = h0_reg + a_reg;
-          h1_new  = h1_reg + b_reg;
-          h2_new  = h2_reg + c_reg;
-          h3_new  = h3_reg + d_reg;
+          h0_new  = byteflip(h0_reg + a_reg);
+          h1_new  = byteflip(h1_reg + b_reg);
+          h2_new  = byteflip(h2_reg + c_reg);
+          h3_new  = byteflip(h3_reg + d_reg);
           h_we    = 1'h1;
         end
 
@@ -540,18 +544,18 @@ module md5_core(
 
         CTRL_NEXT:
           begin
-            if (round_ctr_reg == NUM_ROUNDS)
+            if (round_ctr_reg < 64)
+              begin
+                update_round  = 1'h1;
+                round_ctr_inc = 1'h1;
+              end
+            else
               begin
                 update_state      = 1'h1;
                 ready_new         = 1'h1;
                 ready_we          = 1'h1;
                 md5_core_ctrl_new = CTRL_IDLE;
                 md5_core_ctrl_we  = 1'h1;
-              end
-            else
-              begin
-                update_round  = 1'h1;
-                round_ctr_inc = 1'h1;
               end
           end
 

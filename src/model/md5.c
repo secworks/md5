@@ -71,7 +71,7 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
 
     size_t new_len, offset;
     uint32_t w[16];
-    uint32_t a, b, c, d, i, f, g, temp, lr;
+    uint32_t a, b, c, d, i, f, g, temp, b0, lr;
 
     // Initialize variables - simple count in nibbles:
     h0 = 0x67452301;
@@ -151,12 +151,13 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
             temp = d;
             d = c;
             c = b;
-            lr = LEFTROTATE((a + f + k[i] + w[g]), r[i]);
+            b0 = a + f + k[i] + w[g];
+            lr = LEFTROTATE(b0, r[i]);
             b = b + lr;
             a = temp;
 
             printf("Round %02d:  f: 0x%08x  g: 0x%08x  k:  0x%08x\n", i, f, g, k[i]);
-            printf("Round %02d:  w: 0x%08x  r: 0x%08x  lr: 0x%08x\n", i, w[g], r[i], lr);
+            printf("Round %02d:  w: 0x%08x  r: 0x%08x  b0: 0x%08x  lr: 0x%08x\n", i, w[g], r[i], b0, lr);
             printf("Round %02d:  a: 0x%08x  b: 0x%08x  c:  0x%08x  d:  0x%08x\n", i, a, b, c, d);
             printf("\n");
         }
