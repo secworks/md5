@@ -71,7 +71,7 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
 
     size_t new_len, offset;
     uint32_t w[16];
-    uint32_t a, b, c, d, i, f, g, temp;
+    uint32_t a, b, c, d, i, f, g, temp, lr;
 
     // Initialize variables - simple count in nibbles:
     h0 = 0x67452301;
@@ -106,7 +106,7 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
         for (i = 0; i < 16; i++)
             w[i] = to_int32(msg + offset + i*4);
 
-        printf("Block input\n");
+        printf("Block %02zu input\n", offset);
         printf("w00: 0x%08x  w01: 0x%08x  w02: 0x%08x  w03: 0x%08x\n",
                w[0], w[1], w[2], w[3]);
         printf("w04: 0x%08x  w05: 0x%08x  w06: 0x%08x  w07: 0x%08x\n",
@@ -115,6 +115,7 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
                w[8], w[9], w[10], w[11]);
         printf("w12: 0x%08x  w13: 0x%08x  w14: 0x%08x  w15: 0x%08x\n",
                w[12], w[13], w[14], w[15]);
+        printf("\n");
 
         // Initialize hash value for this chunk:
         a = h0;
@@ -124,31 +125,40 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
 
         printf("State input\n");
         printf("h0: 0x%08x  h1: 0x%08x  h2: 0x%08x  h3: 0x%08x\n", h0, h1, h2, h3);
+        printf("\n");
 
         // Main loop:
-        for(i = 0; i<64; i++) {
-
+        for(i = 0; i < 64; i++) {
             if (i < 16) {
                 f = (b & c) | ((~b) & d);
                 g = i;
+
             } else if (i < 32) {
                 f = (d & b) | ((~d) & c);
                 g = (5*i + 1) % 16;
+
             } else if (i < 48) {
                 f = b ^ c ^ d;
                 g = (3*i + 5) % 16;
+
             } else {
                 f = c ^ (b | (~d));
                 g = (7*i) % 16;
             }
 
+            printf("Round %02d:  a: 0x%08x  b: 0x%08x  c:  0x%08x  d:  0x%08x\n", i, a, b, c, d);
+
             temp = d;
             d = c;
             c = b;
-            b = b + LEFTROTATE((a + f + k[i] + w[g]), r[i]);
+            lr = LEFTROTATE((a + f + k[i] + w[g]), r[i]);
+            b = b + lr;
             a = temp;
 
-            printf("Round %02d:  a: 0x%08x  b: 0x%08x  b: 0x%08x  b: 0x%08x\n", i, a, b, c, d);
+            printf("Round %02d:  f: 0x%08x  g: 0x%08x  k:  0x%08x\n", i, f, g, k[i]);
+            printf("Round %02d:  w: 0x%08x  r: 0x%08x  lr: 0x%08x\n", i, w[g], r[i], lr);
+            printf("Round %02d:  a: 0x%08x  b: 0x%08x  c:  0x%08x  d:  0x%08x\n", i, a, b, c, d);
+            printf("\n");
         }
 
         // Add this chunk's hash to result so far:
@@ -159,6 +169,7 @@ void md5(const uint8_t *initial_msg, size_t initial_len, uint8_t *digest) {
 
         printf("State output\n");
         printf("h0: 0x%08x  h1: 0x%08x  h2: 0x%08x  h3: 0x%08x\n", h0, h1, h2, h3);
+        printf("\n");
     }
 
     // cleanup
@@ -188,7 +199,7 @@ int main(int argc, char **argv) {
 
     len = strlen(msg);
 
-    // benchmark
+    printf("Input: '%s'\n", msg);
     md5((uint8_t*)msg, len, result);
 
     // display result
