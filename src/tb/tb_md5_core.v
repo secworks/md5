@@ -272,6 +272,49 @@ module tb_md5_core();
 
 
   //----------------------------------------------------------------
+  // tc2()
+  // Single, block input representing the string: "a".
+  //----------------------------------------------------------------
+  task tc2;
+    begin
+      $display("*** TC2 - Single byte string input started.");
+      tc_ctr = tc_ctr + 1;
+      tb_monitor = 1;
+
+      $display("-- Asserting init.");
+      tb_init = 1'h1;
+      #(2 * CLK_PERIOD);
+      tb_init = 1'h0;
+
+      #(2 * CLK_PERIOD);
+
+      $display("-- Asserting next.");
+      tb_block = {32'h00008061, 32'h0, 32'h0, 32'h0,
+                  32'h0,        32'h0, 32'h0, 32'h0,
+                  32'h0,        32'h0, 32'h0, 32'h0,
+                  32'h0,        32'h0, 32'h0, 32'h0};
+      tb_next = 1'h1;
+      #(2 * CLK_PERIOD);
+      tb_next = 1'h0;
+      wait_ready();
+      #(2 * CLK_PERIOD);
+
+      if (tb_digest == 128'h0cc175b9c0f1b6a831c399e269772661)
+        $display("** Correct result for TC2.");
+      else
+        begin
+          $display("** Incorrect result for TC2. Expected 0x0cc175b9c0f1b6a831c399e269772661, Got 0x%032x", tb_digest);
+          error_ctr = error_ctr + 1;
+        end
+      $display("*** TC2 completed.");
+      $display("");
+
+      tb_monitor = 0;
+    end
+  endtask // tc2
+
+
+  //----------------------------------------------------------------
   // md5_core_test
   //
   // Test vectors from:
@@ -286,6 +329,7 @@ module tb_md5_core();
       reset_dut();
 
       tc1();
+      tc2();
 
       display_test_result();
       $display("");
