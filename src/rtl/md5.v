@@ -195,7 +195,7 @@ module md5(
               endcase // case (address)
 
               if ((address >= ADDR_DIGEST0) && (address <= ADDR_DIGEST3))
-                tmp_read_data = core_digest[(1 - (address - ADDR_DIGEST0)) * 32 +: 32];
+                tmp_read_data = core_digest[(3 - (address - ADDR_DIGEST0)) * 32 +: 32];
             end
         end
     end // addr_decoder
