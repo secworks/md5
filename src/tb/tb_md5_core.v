@@ -292,7 +292,7 @@ module tb_md5_core();
       tb_block = {32'h00008061, 32'h0, 32'h0, 32'h0,
                   32'h0,        32'h0, 32'h0, 32'h0,
                   32'h0,        32'h0, 32'h0, 32'h0,
-                  32'h0,        32'h0, 32'h0, 32'h0};
+                  32'h0,        32'h0, 32'h8, 32'h0};
       tb_next = 1'h1;
       #(2 * CLK_PERIOD);
       tb_next = 1'h0;
@@ -328,7 +328,6 @@ module tb_md5_core();
       init_sim();
       reset_dut();
 
-      tc1();
       tc2();
 
       display_test_result();
