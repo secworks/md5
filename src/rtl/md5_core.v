@@ -327,7 +327,9 @@ module md5_core(
   // Concurrent connectivity for ports etc.
   //----------------------------------------------------------------
   assign ready  = ready_reg;
-  assign digest = {h0_reg, h1_reg, h2_reg, h3_reg};
+
+  assign digest = {byteflip(h0_reg), byteflip(h1_reg),
+                   byteflip(h2_reg), byteflip(h3_reg)};
 
 
   //----------------------------------------------------------------
@@ -454,10 +456,10 @@ module md5_core(
 
       if (update_state)
         begin
-          h0_new  = byteflip(h0_reg + a_reg);
-          h1_new  = byteflip(h1_reg + b_reg);
-          h2_new  = byteflip(h2_reg + c_reg);
-          h3_new  = byteflip(h3_reg + d_reg);
+          h0_new  = h0_reg + a_reg;
+          h1_new  = h1_reg + b_reg;
+          h2_new  = h2_reg + c_reg;
+          h3_new  = h3_reg + d_reg;
           h_we    = 1'h1;
         end
 

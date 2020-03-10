@@ -236,7 +236,7 @@ module tb_md5_core();
     begin
       $display("*** TC1 - Single empty string input started.");
       tc_ctr = tc_ctr + 1;
-      tb_monitor = 1;
+      tb_monitor = 0;
 
       $display("-- Asserting init.");
       tb_init = 1'h1;
@@ -277,9 +277,9 @@ module tb_md5_core();
   //----------------------------------------------------------------
   task tc2;
     begin
-      $display("*** TC2 - Single byte string input started.");
+      $display("*** TC2 - Single byte string 'a' input started.");
       tc_ctr = tc_ctr + 1;
-      tb_monitor = 1;
+      tb_monitor = 0;
 
       $display("-- Asserting init.");
       tb_init = 1'h1;
@@ -315,6 +315,109 @@ module tb_md5_core();
 
 
   //----------------------------------------------------------------
+  // tc3()
+  // Single, block input representing the string:
+  // "The quick brown fox jumps over the lazy dog".
+  //----------------------------------------------------------------
+  task tc3;
+    begin
+      $display("*** TC3 - 'The quick brown fox jumps over the lazy dog' string input started.");
+      tc_ctr = tc_ctr + 1;
+      tb_monitor = 0;
+
+      $display("-- Asserting init.");
+      tb_init = 1'h1;
+      #(2 * CLK_PERIOD);
+      tb_init = 1'h0;
+
+      #(2 * CLK_PERIOD);
+
+      $display("-- Asserting next.");
+
+      tb_block = {32'h20656854, 32'h63697571, 32'h7262206b, 32'h206e776f,
+                  32'h20786f66, 32'h706d756a, 32'h766f2073, 32'h74207265,
+                  32'h6c206568, 32'h20797a61, 32'h80676f64, 32'h00000000,
+                  32'h00000000, 32'h00000000, 32'h00000158, 32'h00000000};
+      tb_next = 1'h1;
+      #(2 * CLK_PERIOD);
+      tb_next = 1'h0;
+      wait_ready();
+      #(2 * CLK_PERIOD);
+
+      if (tb_digest == 128'h9e107d9d372bb6826bd81d3542a419d6)
+        $display("** Correct result for TC3.");
+      else
+        begin
+          $display("** Incorrect result for TC3. Expected 0x9e107d9d372bb6826bd81d3542a419d6, Got 0x%032x", tb_digest);
+          error_ctr = error_ctr + 1;
+        end
+      $display("*** TC3 completed.");
+      $display("");
+
+      tb_monitor = 0;
+    end
+  endtask // tc3
+
+
+  //----------------------------------------------------------------
+  // tc4()
+  // Dual block input representing the string:
+  // "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  //----------------------------------------------------------------
+  task tc4;
+    begin
+      $display("*** TC4 - 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' string input started.");
+      tc_ctr = tc_ctr + 1;
+      tb_monitor = 0;
+
+      $display("-- Asserting init.");
+      tb_init = 1'h1;
+      #(2 * CLK_PERIOD);
+      tb_init = 1'h0;
+
+      #(2 * CLK_PERIOD);
+
+      $display("-- Asserting next for first block.");
+      tb_block = {32'h61616161, 32'h61616161, 32'h61616161, 32'h61616161,
+                  32'h61616161, 32'h61616161, 32'h61616161, 32'h61616161,
+                  32'h61616161, 32'h61616161, 32'h61616161, 32'h61616161,
+                  32'h61616161, 32'h61616161, 32'h61616161, 32'h61616161};
+      tb_next = 1'h1;
+      #(2 * CLK_PERIOD);
+      tb_next = 1'h0;
+      wait_ready();
+      $display("-- Processing of first block completed.");
+      #(2 * CLK_PERIOD);
+
+
+      $display("-- Asserting next for second block.");
+      tb_block = {32'h00806161, 32'h00000000, 32'h00000000, 32'h00000000,
+                  32'h00000000, 32'h00000000, 32'h00000000, 32'h00000000,
+                  32'h00000000, 32'h00000000, 32'h00000000, 32'h00000000,
+                  32'h00000000, 32'h00000000, 32'h00000210, 32'h00000000};
+      tb_next = 1'h1;
+      #(2 * CLK_PERIOD);
+      tb_next = 1'h0;
+      wait_ready();
+      $display("-- Processing of second block completed.");
+      #(2 * CLK_PERIOD);
+
+      if (tb_digest == 128'hdef5d97e01e1219fb2fc8da6c4d6ba2f)
+        $display("** Correct result for TC4.");
+      else
+        begin
+          $display("** Incorrect result for TC4. Expected 0xdef5d97e01e1219fb2fc8da6c4d6ba2f, Got 0x%032x", tb_digest);
+          error_ctr = error_ctr + 1;
+        end
+      $display("*** TC4 completed.");
+      $display("");
+
+      tb_monitor = 0;
+    end
+  endtask // tc4
+
+
+  //----------------------------------------------------------------
   // md5_core_test
   //
   // Test vectors from:
@@ -328,7 +431,10 @@ module tb_md5_core();
       init_sim();
       reset_dut();
 
+      tc1();
       tc2();
+      tc3();
+      tc4();
 
       display_test_result();
       $display("");
