@@ -2,7 +2,7 @@
 Hardware implementation of the md5 hash function.
 
 ## Status
-Completed. Does Work. **Do. Not. Use.** (unless you know what you do.)
+Completed. Does Work. **Do. Not. Use.** (Unless you know what you do.)
 
 
 ## Introduction
