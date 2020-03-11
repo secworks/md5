@@ -2,7 +2,7 @@
 Hardware implementation of the md5 hash function.
 
 ## Status
-Not completed. Does **NOT** work.
+Completed. Does Work. **Do. Not. Use.** (unless you know what you do.)
 
 
 ## Introduction
@@ -16,7 +16,6 @@ it to protect anything - password hashes for example.
 
 ## Implementation
 The core is implemented in Verilog.
-
 
 
 ### Implementation Results
