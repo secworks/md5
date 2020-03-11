@@ -289,10 +289,10 @@ module tb_md5_core();
       #(2 * CLK_PERIOD);
 
       $display("-- Asserting next.");
-      tb_block = {32'h00008061, 32'h0, 32'h0, 32'h0,
-                  32'h0,        32'h0, 32'h0, 32'h0,
-                  32'h0,        32'h0, 32'h0, 32'h0,
-                  32'h0,        32'h0, 32'h8, 32'h0};
+      tb_block = {32'h00008061, 32'h0, 32'h0,        32'h0,
+                  32'h0,        32'h0, 32'h0,        32'h0,
+                  32'h0,        32'h0, 32'h0,        32'h0,
+                  32'h0,        32'h0, 32'h00000008, 32'h0};
       tb_next = 1'h1;
       #(2 * CLK_PERIOD);
       tb_next = 1'h0;

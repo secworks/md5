@@ -278,6 +278,7 @@ module tb_md5();
 
   //----------------------------------------------------------------
   // tc1()
+  // Empty string "" test case.
   //----------------------------------------------------------------
   task tc1;
     begin : tc1
@@ -346,6 +347,146 @@ module tb_md5();
 
 
   //----------------------------------------------------------------
+  // tc2()
+  // Single char "a" testcase.
+  //----------------------------------------------------------------
+  task tc2;
+    begin : tc2
+      reg [127 : 0] digest;
+
+      tc_ctr = tc_ctr + 1;
+
+      tb_monitor = 1;
+
+      $display("");
+      $display("*** TC2 empty string test case started.");
+
+      // Perform init.
+      $display("*** TC2 - starting init.");
+      write_word(ADDR_CTRL, 32'h1);
+      wait_ready();
+      $display("*** TC2 - init completed.");
+
+
+      $display("*** TC2 - writing block and performing hash.");
+      write_word(ADDR_BLOCK0 + 0,  32'h00008061);
+      write_word(ADDR_BLOCK0 + 1,  32'h0);
+      write_word(ADDR_BLOCK0 + 2,  32'h0);
+      write_word(ADDR_BLOCK0 + 3,  32'h0);
+      write_word(ADDR_BLOCK0 + 4,  32'h0);
+      write_word(ADDR_BLOCK0 + 5,  32'h0);
+      write_word(ADDR_BLOCK0 + 6,  32'h0);
+      write_word(ADDR_BLOCK0 + 7,  32'h0);
+      write_word(ADDR_BLOCK0 + 8,  32'h0);
+      write_word(ADDR_BLOCK0 + 9,  32'h0);
+      write_word(ADDR_BLOCK0 + 10, 32'h0);
+      write_word(ADDR_BLOCK0 + 11, 32'h0);
+      write_word(ADDR_BLOCK0 + 12, 32'h0);
+      write_word(ADDR_BLOCK0 + 13, 32'h0);
+      write_word(ADDR_BLOCK0 + 14, 32'h00000008);
+      write_word(ADDR_BLOCK0 + 15, 32'h0);
+
+      write_word(ADDR_CTRL, 32'h2);
+      wait_ready();
+      $display("*** TC2 - hash completed.");
+
+      // Reading out the result.
+      read_word(ADDR_DIGEST0 + 0);
+      digest[127 : 96] = read_data;
+      read_word(ADDR_DIGEST0 + 1);
+      digest[95 : 64] = read_data;
+      read_word(ADDR_DIGEST0 + 2);
+      digest[63 : 32] = read_data;
+      read_word(ADDR_DIGEST0 + 3);
+      digest[31 : 0] = read_data;
+
+      tb_monitor = 0;
+
+      if (digest == 128'h0cc175b9c0f1b6a831c399e269772661)
+        begin
+          $display("*** Correct digest received.");
+        end
+      else
+        begin
+          $display("*** Incorrect digest received. Expected 0x128'h0cc175b9c0f1b6a831c399e269772661, got 0x%016x", digest);
+          error_ctr = error_ctr + 1;
+        end
+      $display("");
+    end
+  endtask // tc2
+
+
+  //----------------------------------------------------------------
+  // tc3()
+  // "The quick brown fox jumps over the lazy dog" testcase.
+  //----------------------------------------------------------------
+  task tc3;
+    begin : tc3
+      reg [127 : 0] digest;
+
+      tc_ctr = tc_ctr + 1;
+
+      tb_monitor = 1;
+
+      $display("");
+      $display("*** TC3 'The quick brown fox jumps over the lazy dog'");
+
+      // Perform init.
+      $display("*** TC3 - starting init.");
+      write_word(ADDR_CTRL, 32'h1);
+      wait_ready();
+      $display("*** TC3 - init completed.");
+
+
+      $display("*** TC2 - writing block and performing hash.");
+      write_word(ADDR_BLOCK0 + 0,  32'h20656854);
+      write_word(ADDR_BLOCK0 + 1,  32'h63697571);
+      write_word(ADDR_BLOCK0 + 2,  32'h7262206b);
+      write_word(ADDR_BLOCK0 + 3,  32'h206e776f);
+      write_word(ADDR_BLOCK0 + 4,  32'h20786f66);
+      write_word(ADDR_BLOCK0 + 5,  32'h706d756a);
+      write_word(ADDR_BLOCK0 + 6,  32'h766f2073);
+      write_word(ADDR_BLOCK0 + 7,  32'h74207265);
+      write_word(ADDR_BLOCK0 + 8,  32'h6c206568);
+      write_word(ADDR_BLOCK0 + 9,  32'h20797a61);
+      write_word(ADDR_BLOCK0 + 10, 32'h80676f64);
+      write_word(ADDR_BLOCK0 + 11, 32'h0);
+      write_word(ADDR_BLOCK0 + 12, 32'h0);
+      write_word(ADDR_BLOCK0 + 13, 32'h0);
+      write_word(ADDR_BLOCK0 + 14, 32'h00000158);
+      write_word(ADDR_BLOCK0 + 15, 32'h0);
+
+      write_word(ADDR_CTRL, 32'h2);
+      wait_ready();
+      $display("*** TC3 - hash completed.");
+
+      // Reading out the result.
+      read_word(ADDR_DIGEST0 + 0);
+      digest[127 : 96] = read_data;
+      read_word(ADDR_DIGEST0 + 1);
+      digest[95 : 64] = read_data;
+      read_word(ADDR_DIGEST0 + 2);
+      digest[63 : 32] = read_data;
+      read_word(ADDR_DIGEST0 + 3);
+      digest[31 : 0] = read_data;
+
+      tb_monitor = 0;
+
+      if (digest == 128'h9e107d9d372bb6826bd81d3542a419d6)
+        begin
+          $display("*** Correct digest received.");
+        end
+      else
+        begin
+          $display("*** Incorrect digest received. Expected 0x128'h9e107d9d372bb6826bd81d3542a419d6, got 0x%016x", digest);
+          error_ctr = error_ctr + 1;
+        end
+      $display("");
+    end
+  endtask // tc3
+
+
+  //----------------------------------------------------------------
   // md5_test
   //----------------------------------------------------------------
   initial
@@ -358,6 +499,8 @@ module tb_md5();
       reset_dut();
 
       tc1();
+      tc2();
+      tc3();
 
       display_test_result();
       $display("");
