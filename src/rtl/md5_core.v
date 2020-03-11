@@ -125,13 +125,13 @@ module md5_core(
       if (round < 16)
         F = (b & c) | ((~b) & d);
 
-      if ((round >= 16) &&  (round < 32))
+      else if ((round >= 16) &&  (round < 32))
         F = (d & b) | ((~d) & c);
 
-      if ((round >= 32) && (round < 48))
+      else  if ((round >= 32) && (round < 48))
         F = b ^ c ^ d;
 
-      if (round >= 48)
+      else // (round >= 48)
         F = c ^ (b | (~d));
     end
   endfunction // F
@@ -221,7 +221,7 @@ module md5_core(
           3: rotate = {x[09 : 0], x[31 : 10]};
         endcase // case (x[1 : 0])
 
-      if ((round >= 16) && (round < 32))
+      else if ((round >= 16) && (round < 32))
         case(round[1 : 0])
           0: rotate = {x[26 : 0], x[31 : 27]};
           1: rotate = {x[22 : 0], x[31 : 23]};
@@ -229,7 +229,7 @@ module md5_core(
           3: rotate = {x[11 : 0], x[31 : 12]};
         endcase // case (x[1 : 0])
 
-      if ((round >= 32) && (round < 48))
+      else if ((round >= 32) && (round < 48))
         case(round[1 : 0])
           0: rotate = {x[27 : 0], x[31 : 28]};
           1: rotate = {x[20 : 0], x[31 : 21]};
@@ -237,7 +237,7 @@ module md5_core(
           3: rotate = {x[08 : 0], x[31 : 09]};
         endcase // case (x[1 : 0])
 
-      if (round >= 48)
+      else // (round >= 48)
         case(round[1 : 0])
           0: rotate = {x[25 : 0], x[31 : 26]};
           1: rotate = {x[21 : 0], x[31 : 22]};
