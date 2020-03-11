@@ -21,8 +21,8 @@ The core is implemented in Verilog.
 ### Implementation Results
 
 ## Altera FPGAs
-Tool:   Intel Quartus Prime 19.1
-Device: 5CGXFC7C6U19C7
-ALMs:   673
-Regs:   1385
-Fmax:   85 MHz
+* Tool:   Intel Quartus Prime 19.1
+* Device: 5CGXFC7C6U19C7
+* ALMs:   673
+* Regs:   1385
+* Fmax:   85 MHz
