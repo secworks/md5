@@ -22,7 +22,15 @@ The core is implemented in Verilog.
 
 ## Altera FPGAs
 * Tool:   Intel Quartus Prime 19.1
-* Device: 5CGXFC7C6U19C7
+* Device: Cyclone V - 5CGXFC7C6U19C7
 * ALMs:   673
 * Regs:   1385
 * Fmax:   85 MHz
+
+
+## Xilinx FPGAs
+* Tool:   Xilinx Vivado
+* Device: Artix-7 - xc7a200tsbv484-2
+* LUT:    786
+* Regs:   1295
+* Fmax:   NOT DONE.
