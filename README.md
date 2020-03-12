@@ -33,4 +33,4 @@ The core is implemented in Verilog.
 * Device: Artix-7 - xc7a200tsbv484-2
 * LUT:    786
 * Regs:   1295
-* Fmax:   NOT DONE.
+* Fmax:   119 MHz
