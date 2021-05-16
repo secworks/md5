@@ -1,0 +1,44 @@
+CAPI=2:
+
+name : secworks:crypto:md5:0
+
+filesets:
+  rtl:
+    files:
+      - src/rtl/md5.v
+      - src/rtl/md5_core.v
+    file_type : verilogSource
+
+  tb:
+    files:
+      - src/tb/tb_md5.v
+      - src/tb/tb_md5_core.v
+    file_type : verilogSource
+
+  openlane: {files : [data/sky130.tcl : {file_type : tclSource}]}
+
+targets:
+  default:
+    filesets: [rtl]
+
+  lint:
+    default_tool : verilator
+    filesets : [rtl]
+    tools:
+      verilator:
+        mode : lint-only
+    toplevel : md5
+
+  sky130:
+    default_tool: openlane
+    filesets: [rtl, openlane]
+    toplevel: md5
+
+  tb_md5: &tb
+    default_tool: icarus
+    filesets: [rtl, tb]
+    toplevel : tb_md5
+
+  tb_md5_core:
+    <<: *tb
+    toplevel : tb_md5_core
