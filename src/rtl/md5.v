@@ -36,6 +36,8 @@
 //
 //======================================================================
 
+`default_nettype none
+
 module md5(
            input wire           clk,
            input wire           reset_n,

@@ -36,6 +36,8 @@
 //
 //======================================================================
 
+`default_nettype none
+
 module md5_core(
                 input wire            clk,
                 input wire            reset_n,
@@ -57,10 +59,8 @@ module md5_core(
   localparam C0 = 32'h98badcfe;
   localparam D0 = 32'h10325476;
 
-  localparam CTRL_IDLE   = 3'h0;
-  localparam CTRL_NEXT   = 3'h1;
-  localparam CTRL_LOOP   = 3'h2;
-  localparam CTRL_FINISH = 3'h3;
+  localparam CTRL_IDLE   = 1'h0;
+  localparam CTRL_NEXT   = 1'h1;
 
   localparam NUM_ROUNDS = 64;
 
@@ -101,8 +101,8 @@ module md5_core(
   reg           round_ctr_rst;
   reg           round_ctr_we;
 
-  reg [2 : 0]   md5_core_ctrl_reg;
-  reg [2 : 0]   md5_core_ctrl_new;
+  reg           md5_core_ctrl_reg;
+  reg           md5_core_ctrl_new;
   reg           md5_core_ctrl_we;
 
 
@@ -546,7 +546,7 @@ module md5_core(
 
         CTRL_NEXT:
           begin
-            if (round_ctr_reg < 64)
+            if (round_ctr_reg < NUM_ROUNDS)
               begin
                 update_round  = 1'h1;
                 round_ctr_inc = 1'h1;
