@@ -33,35 +33,35 @@ Create and enter a new workspace
 mkdir workspace && cd workspace
 ~~~
 
-Register aes as a library in the workspace
+Register md5 as a library in the workspace
 ~~~
-fusesoc library add aes /path/to/aes
+fusesoc library add md5 /path/to/md5
 ~~~
 
 ...if repo is available locally or...
 ...to get the upstream repo
 ~~~
-fusesoc library add aes https://github.com/secworks/aes
+fusesoc library add md5 https://github.com/secworks/md5
 ~~~
 
 To run lint
 ~~~
-fusesoc run --target=lint secworks:crypto:aes
+fusesoc run --target=lint secworks:crypto:md5
 ~~~
 
-Run tb_aes testbench
+Run tb_md5 testbench
 ~~~
-fusesoc run --target=tb_aes secworks:crypto:aes
+fusesoc run --target=tb_md5 secworks:crypto:md5
 ~~~
 
 Run with modelsim instead of default tool (icarus)
 ~~~
-fusesoc run --target=tb_aes --tool=modelsim secworks:crypto:aes
+fusesoc run --target=tb_md5 --tool=modelsim secworks:crypto:md5
 ~~~
 
 List all targets
 ~~~
-fusesoc core show secworks:crypto:aes
+fusesoc core show secworks:crypto:md5
 ~~~
 
 
